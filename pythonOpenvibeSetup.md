@@ -1,4 +1,18 @@
-# Visual Studio Code OpenViBE Setup
+# Setup OpenVIBE for Python3 development
+
+## Install Python for OpenViBE 3.0.0
+
+* [Python 3.7.8 64bits](https://www.python.org/ftp/python/3.7.8/python-3.7.8-amd64-webinstall.exe) for 64bit OpenViBE on Windows 10
+* [Python 3.7.8 32bits](https://www.python.org/ftp/python/3.7.8/python-3.7.8-webinstall.exe) for 32bit OpenViBE on Windows 10
+
+## Python Scripting box not listed in Designer ?
+
+1. Just search "Edit the system environment variables" in the Windows search bar.
+2. Environment Variables -> System Variables -> Path -> Edit -> New -> Add the path to the Python folder in your system.
+3. If you have more than one Python version installed, make sure to make the path to python3.7 at the top of the list.
+4. Then save the changes and restart OpenViBE Designer.
+
+## Visual Studio Code OpenVIBE with python Setup
 
 1. Open Visual Studio Code.
 2. Open the settings.json file by clicking on the gear icon in the bottom left corner of the window and selecting "Settings" from the dropdown menu.
