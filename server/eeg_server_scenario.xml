@@ -1,0 +1,18 @@
+<OpenViBE-Scenario>
+	<FormatVersion>2</FormatVersion>
+	<Creator>OpenViBE Designer</Creator>
+	<CreatorVersion>3.5.0</CreatorVersion>
+	<Settings></Settings>
+	<Inputs></Inputs>
+	<Outputs></Outputs>
+	<Boxes></Boxes>
+	<Links></Links>
+	<Comments></Comments>
+	<Metadata>
+		<Entry>
+			<Identifier>(0x00007e5b, 0x00006c59)</Identifier>
+			<Type>(0x3bcce5d2, 0x43f2d968)</Type>
+			<Data>[{"boxIdentifier":"(0xffffffff, 0xffffffff)","childCount":1,"height":1,"identifier":"(0x00003cd5, 0x000073b5)","name":"Default window","parentIdentifier":"(0xffffffff, 0xffffffff)","type":1,"width":1},{"boxIdentifier":"(0xffffffff, 0xffffffff)","childCount":1,"identifier":"(0x000021f2, 0x0000165a)","index":0,"name":"Default tab","parentIdentifier":"(0x00003cd5, 0x000073b5)","type":2},{"boxIdentifier":"(0xffffffff, 0xffffffff)","childCount":0,"identifier":"(0x000014ae, 0x00003c3d)","index":0,"name":"Empty","parentIdentifier":"(0x000021f2, 0x0000165a)","type":0}]</Data>
+		</Entry>
+	</Metadata>
+</OpenViBE-Scenario>
