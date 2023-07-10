@@ -1,3 +1,10 @@
+from enum import Enum
+
+
+class State(Enum):
+    INIT = 0
+    SENDING = 1
+    RECEIVING = 2
 class EEGServerBox(OVBox):
     def __init__(self):
         OVBox.__init__(self)
