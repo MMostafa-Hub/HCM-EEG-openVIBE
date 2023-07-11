@@ -10,15 +10,39 @@ class EEGSubscriberBox(OVBox):
     def __init__(self):
         OVBox.__init__(self)
         import socket
+        import threading
 
         self.connection: socket.socket
         self.udp_socket: socket.socket
 
         self.state: State = State.STAND_BY
 
+        self.time_stamp = False
+        self.command_thread: threading.Thread
+
+    def _process_commands(self):
+        import pickle as pkl
+
+        while True:
+            decoded_command, publisher_address = self.udp_socket.recvfrom(4096)
+            command = pkl.loads(decoded_command)
+
+            if self.state == State.STAND_BY and command == "start":
+                self.state = State.RECORDING
+
+                print("Started recording")
+            elif self.state == State.RECORDING and command == "stop":
+                self.state = State.STAND_BY
+                print("Stopped recording")
+
+            elif self.state == State.RECORDING and command == "time_stamp":
+                self.time_stamp = True
+                print("Time stamping")
+
     def initialize(self):
         print("Initializing EEG subscriber Box")
         import socket
+        import threading
 
         # Create a UDP socket
         self.udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -27,22 +51,21 @@ class EEGSubscriberBox(OVBox):
         subscriber_address = ("localhost", 12345)
         self.udp_socket.bind(subscriber_address)
 
+        # Create a thread to process the commands
+        self.command_thread = threading.Thread(target=self._process_commands)
+        self.command_thread.start()
+
     def process(self):
-        import pickle as pkl
-
-        decoded_command, publisher_address = self.udp_socket.recvfrom(4096)
-        command = pkl.loads(decoded_command)
-
-        if command == "start":
-            self.state = State.RECORDING
-
-            print("Started recording")
-        elif command == "stop":
-            self.state = State.STAND_BY
-            print("Stopped recording")
+        if self.state == State.RECORDING:
+            # Take the EEG signal from the input buffer
+            eeg_signal_stream = self.input[0]
+            while eeg_signal_stream:
+                chunk = eeg_signal_stream.pop()
+                # TODO: save the data to a .csv file
 
     def uninitialize(self):
         print("Uninitialized EEG subscriber Box")
+        self.command_thread.join()
 
 
 box = EEGSubscriberBox()
