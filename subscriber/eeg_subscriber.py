@@ -9,6 +9,7 @@ class State(Enum):
 class EEGSubscriberBox(OVBox):
     def __init__(self):
         OVBox.__init__(self)
+        import pandas as pd
         import socket
         import threading
 
@@ -19,6 +20,10 @@ class EEGSubscriberBox(OVBox):
 
         self.time_stamp = False
         self.command_thread: threading.Thread
+        self.eeg_signal_header: OVSignalHeader
+        self.eeg_dataset: pd.DataFrame = pd.DataFrame(
+            columns=["timestamp", "time"] + [f"channel_{i}" for i in range(32)]
+        )
 
     def _process_commands(self):
         import pickle as pkl
@@ -31,6 +36,7 @@ class EEGSubscriberBox(OVBox):
                 self.state = State.RECORDING
 
                 print("Started recording")
+
             elif self.state == State.RECORDING and command == "stop":
                 self.state = State.STAND_BY
                 print("Stopped recording")
@@ -66,7 +72,9 @@ class EEGSubscriberBox(OVBox):
 
     def uninitialize(self):
         print("Uninitialized EEG subscriber Box")
-        self.command_thread.join()
+        import pandas as pd
+
+        pd.DataFrame.to_csv(self.eeg_dataset, "eeg_dataset.csv")
 
 
 box = EEGSubscriberBox()
