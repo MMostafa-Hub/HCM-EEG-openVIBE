@@ -58,7 +58,10 @@ class EEGSubscriberBox(OVBox):
         self.udp_socket.bind(subscriber_address)
 
         # Create a thread to process the commands
-        self.command_thread = threading.Thread(target=self._process_commands)
+        # Daemon threads are abruptly stopped at shutdown
+        self.command_thread = threading.Thread(
+            target=self._process_commands, daemon=True
+        )
         self.command_thread.start()
 
     def process(self):
