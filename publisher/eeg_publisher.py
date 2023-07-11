@@ -19,7 +19,7 @@ class EEGPublisherBox(OVBox):
     def process(self):
         import pickle as pkl
         import time
-        
+
         # Take the EEG signal from the input buffer
         eeg_signal_stream = self.input[0]
         while eeg_signal_stream:
