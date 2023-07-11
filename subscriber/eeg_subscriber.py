@@ -62,6 +62,7 @@ class EEGSubscriberBox(OVBox):
             chunk = eeg_signal_stream.pop()
             if self.state == State.RECORDING:
                 # TODO: save the data to a .csv file
+                pass
 
     def uninitialize(self):
         print("Uninitialized EEG subscriber Box")
