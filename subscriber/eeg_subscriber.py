@@ -56,11 +56,11 @@ class EEGSubscriberBox(OVBox):
         self.command_thread.start()
 
     def process(self):
-        if self.state == State.RECORDING:
-            # Take the EEG signal from the input buffer
-            eeg_signal_stream = self.input[0]
-            while eeg_signal_stream:
-                chunk = eeg_signal_stream.pop()
+        # Take the EEG signal from the input buffer
+        eeg_signal_stream = self.input[0]
+        while eeg_signal_stream:
+            chunk = eeg_signal_stream.pop()
+            if self.state == State.RECORDING:
                 # TODO: save the data to a .csv file
 
     def uninitialize(self):
