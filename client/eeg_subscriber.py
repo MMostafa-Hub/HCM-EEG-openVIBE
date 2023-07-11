@@ -1,4 +1,4 @@
-class EEGClientBox(OVBox):
+class EEGPublisherBox(OVBox):
     def __init__(self):
         OVBox.__init__(self)
         import socket
@@ -6,15 +6,15 @@ class EEGClientBox(OVBox):
         self.tcp_socket: socket.socket
 
     def initialize(self):
-        print("Initializing EEG Client Box")
+        print("Initializing EEG publisher Box")
         import socket
 
         # Create a TCP/IP socket
         self.tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         # Connect the socket to the port where the server is listening
-        server_address = ("localhost", 12345)
-        self.tcp_socket.connect(server_address)
+        subscriber_address = ("localhost", 12345)
+        self.tcp_socket.connect(subscriber_address)
 
     def process(self):
         import pickle as pkl
@@ -29,7 +29,7 @@ class EEGClientBox(OVBox):
             self.tcp_socket.send(pkl.dumps(chunk))
 
     def uninitialize(self):
-        print("Uninitialized EEG Client Box")
+        print("Uninitialized EEG publisher Box")
 
 
-box = EEGClientBox()
+box = EEGPublisherBox()

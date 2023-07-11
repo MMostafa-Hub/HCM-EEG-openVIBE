@@ -7,7 +7,7 @@ class State(Enum):
     RECEIVING = 2
 
 
-class EEGServerBox(OVBox):
+class EEGSubscriberBox(OVBox):
     def __init__(self):
         OVBox.__init__(self)
         import socket
@@ -18,22 +18,22 @@ class EEGServerBox(OVBox):
         self.state: State = State.INIT
 
     def initialize(self):
-        print("Initializing EEG Server Box")
+        print("Initializing EEG subscriber Box")
         import socket
 
         # Create a TCP/IP socket
         self.tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         # Bind the socket to the port
-        server_address = ("localhost", 12345)
-        self.tcp_socket.bind(server_address)
+        subscriber_address = ("localhost", 12345)
+        self.tcp_socket.bind(subscriber_address)
 
     def process(self):
         # Wait for a connection
         if self.state == State.INIT:
             self.tcp_socket.listen(1)
-            self.connection, client_address = self.tcp_socket.accept()
-            print("Connection from", client_address)
+            self.connection, publisher_address = self.tcp_socket.accept()
+            print("Connection from", publisher_address)
 
             self.state = State.RECEIVING
         # Receive the data in small chunks and output it
@@ -45,7 +45,7 @@ class EEGServerBox(OVBox):
             self.output[0].append(chunk)
 
     def uninitialize(self):
-        print("Uninitialized EEG Server Box")
+        print("Uninitialized EEG subscriber Box")
 
 
-box = EEGServerBox()
+box = EEGSubscriberBox()
