@@ -2,9 +2,8 @@ from enum import Enum
 
 
 class State(Enum):
-    INIT = 0
-    SENDING = 1
-    RECEIVING = 2
+    STAND_BY = 0
+    RECORDING = 1
 
 
 class EEGSubscriberBox(OVBox):
@@ -13,36 +12,34 @@ class EEGSubscriberBox(OVBox):
         import socket
 
         self.connection: socket.socket
-        self.tcp_socket: socket.socket
+        self.udp_socket: socket.socket
 
-        self.state: State = State.INIT
+        self.state: State = State.STAND_BY
 
     def initialize(self):
         print("Initializing EEG subscriber Box")
         import socket
 
-        # Create a TCP/IP socket
-        self.tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        # Create a UDP socket
+        self.udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
         # Bind the socket to the port
         subscriber_address = ("localhost", 12345)
-        self.tcp_socket.bind(subscriber_address)
+        self.udp_socket.bind(subscriber_address)
 
     def process(self):
-        # Wait for a connection
-        if self.state == State.INIT:
-            self.tcp_socket.listen(1)
-            self.connection, publisher_address = self.tcp_socket.accept()
-            print("Connection from", publisher_address)
+        import pickle as pkl
 
-            self.state = State.RECEIVING
-        # Receive the data in small chunks and output it
-        elif self.state == State.RECEIVING:
-            import pickle as pkl
+        decoded_command, publisher_address = self.udp_socket.recvfrom(4096)
+        command = pkl.loads(decoded_command)
 
-            data = self.connection.recv(4096)
-            chunk = pkl.loads(data)
-            self.output[0].append(chunk)
+        if command == "start":
+            self.state = State.RECORDING
+
+            print("Started recording")
+        elif command == "stop":
+            self.state = State.STAND_BY
+            print("Stopped recording")
 
     def uninitialize(self):
         print("Uninitialized EEG subscriber Box")
