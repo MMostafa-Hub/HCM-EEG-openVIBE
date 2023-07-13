@@ -8,7 +8,7 @@
 	<Boxes>
 		<Box>
 			<Identifier>(0x00000643, 0x0000062f)</Identifier>
-			<Name>EEG Client</Name>
+			<Name>EEG Subscriber</Name>
 			<AlgorithmClassIdentifier>(0x5dc4f669, 0xd3fd4d63)</AlgorithmClassIdentifier>
 			<Inputs>
 				<Input>
@@ -29,7 +29,7 @@
 					<TypeIdentifier>(0xb0d0db45, 0x49cbc34a)</TypeIdentifier>
 					<Name>Script</Name>
 					<DefaultValue></DefaultValue>
-					<Value>C:/E_But_FAST/HCM-EEG-openVIBE/client/eeg_client.py</Value>
+					<Value>C:/E_But_FAST/HCM-EEG-openVIBE/subscriber/eeg_subscriber.py</Value>
 					<Modifiability>false</Modifiability>
 				</Setting>
 			</Settings>
@@ -125,7 +125,7 @@
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x207c9054, 0x3c841b63)</Identifier>
-					<Value>416</Value>
+					<Value>432</Value>
 				</Attribute>
 				<Attribute>
 					<Identifier>(0x4e7b798a, 0x183beafb)</Identifier>
