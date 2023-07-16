@@ -12,7 +12,7 @@ class Command(Enum):
     END = 4
 
 
-key_to_command = {"r": Command.START, "s": Command.STOP}
+key_to_command = {"r": Command.START, "s": Command.STOP, "e": Command.END}
 
 
 # Create a UDP socket
