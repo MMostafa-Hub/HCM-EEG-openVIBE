@@ -3,8 +3,8 @@ import pandas as pd
 import socket
 import threading
 import pickle as pkl
-import time
 import numpy as np
+
 
 
 class State(Enum):
@@ -21,6 +21,7 @@ class Command(Enum):
 
 
 CHANNEL_COUNT = 32
+SUBSCRIBER_IP = "localhost"
 
 
 class EEGSubscriberBox(OVBox):
@@ -44,6 +45,7 @@ class EEGSubscriberBox(OVBox):
         chunks = [data[i : i + CHUNK_SIZE] for i in range(0, len(data), CHUNK_SIZE)]
         for chunk in chunks:
             sock.sendto(chunk, addr)
+
     def _process_commands(self):
         print("Thread to process commands started")
 
@@ -96,7 +98,7 @@ class EEGSubscriberBox(OVBox):
         print("Socket created")
 
         # Bind the socket to the port
-        subscriber_address = ("localhost", 12345)
+        subscriber_address = (SUBSCRIBER_IP, 12345)
         self.udp_socket.bind(subscriber_address)
 
         print("Socket created and bound to port 12345")
@@ -139,17 +141,7 @@ class EEGSubscriberBox(OVBox):
     def uninitialize(self):
         print("Uninitialized EEG subscriber Box")
         self.udp_socket.close()
-        import os
-        import inspect
-
-        # Get the directory of the current script
-        script_dir = os.path.dirname(os.path.abspath(inspect.stack()[0].filename))
-
-        # Create the file path for the CSV file
-        csv_file_path = os.path.join(script_dir, "eeg_dataset.csv")
-
-        # Save the dataset to a csv file
-        self.eeg_df.to_csv(csv_file_path, index=False)
+        self.command_thread.kill = True
 
 
 box = EEGSubscriberBox()
