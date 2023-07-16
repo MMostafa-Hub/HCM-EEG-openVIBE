@@ -23,6 +23,15 @@ subscriber_address = ("localhost", 12345)
 
 old_command: Command = None
 
+def receive_large_data(sock, buffer_size=4096):
+    data = bytearray()
+    while True:
+        part = sock.recv(buffer_size)
+        data.extend(part)
+        if len(part) < buffer_size:
+            break
+    return data
+
 
 def on_press(key):
     global old_command
