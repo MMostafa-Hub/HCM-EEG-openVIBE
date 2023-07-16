@@ -28,6 +28,7 @@ class EEGSubscriberBox(OVBox):
         OVBox.__init__(self)
 
         self.udp_socket: socket.socket
+        self.publisher_address: tuple = None
         self.state: State = State.STAND_BY
         self.event = False
         self.command_thread: threading.Thread
@@ -43,9 +44,9 @@ class EEGSubscriberBox(OVBox):
         try:
             while True:
                 print("Waiting for command")
-                encoded_command, publisher_address = self.udp_socket.recvfrom(4096)
+                encoded_command, self.publisher_address = self.udp_socket.recvfrom(4096)
                 command = pkl.loads(encoded_command)
-                print(f"Received command {command}")
+                print(f"Received command {command} from {self.publisher_address}")
 
                 if self.state == State.STAND_BY and command == Command.START:
                     self.state = State.RECORDING
