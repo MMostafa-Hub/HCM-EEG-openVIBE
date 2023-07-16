@@ -7,7 +7,8 @@ from enum import Enum
 class Command(Enum):
     START = 0
     STOP = 1
-    EVENT = 2
+    START_EVENT = 2
+    STOP_EVENT = 3
 
 
 key_to_command = {"r": Command.START, "s": Command.STOP, "space": Command.EVENT}
