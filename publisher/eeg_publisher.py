@@ -1,9 +1,7 @@
-import keyboard
-import threading
+from pynput import keyboard
 import socket
 import pickle as pkl
 from enum import Enum
-import time
 
 
 class Command(Enum):
@@ -19,34 +17,31 @@ key_to_command = {"r": Command.START, "s": Command.STOP, "space": Command.EVENT}
 publisher_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 # Bind the socket to the port
-publisher_address = ("localhost", 12345)
+subscriber_address = ("localhost", 12345)
 
 
-class KeyListener(threading.Thread):
-    def __init__(self, *args, **kwargs):
-        super(KeyListener, self).__init__(*args, **kwargs)
-        self.daemon = True  # Set the Thread as Daemon so it automatically closes when the main program ends
-        self.key = None
+def on_press(key):
+    command: Command = None
+    try:
+        if key == keyboard.Key.space:
+            command = Command.EVENT
+        else:
+            command = key_to_command.get(key.char)
+    except AttributeError:
+        pass
 
-    def run(self):
-        while True:
-            self.key = keyboard.read_key()
-            if str(self.key) in key_to_command.keys():
-                print(f"Pressed {self.key}")
-                # send the key to the subscriber
-                publisher_socket.sendto(
-                    pkl.dumps(key_to_command[str(self.key)]), publisher_address
-                )
-            self.key = None
+    if command:
+        print(f"Pressed {key}")
+        # send the key to the subscriber
+        publisher_socket.sendto(pkl.dumps(command), subscriber_address)
 
 
-def main():
-    key_thread = KeyListener()
-    key_thread.start()
-
-    while True:  # Keep the main thread alive
-        time.sleep(0.2)
+def on_release(key):
+    if key == keyboard.Key.esc:
+        # Stop listener
+        return False
 
 
-if __name__ == "__main__":
-    main()
+# Collect events until released
+with keyboard.Listener(on_press=on_press, on_release=on_release) as listener:
+    listener.join()
