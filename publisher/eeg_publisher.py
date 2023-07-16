@@ -2,6 +2,7 @@ from pynput import keyboard
 import socket
 import pickle as pkl
 from enum import Enum
+import pandas as pd
 
 
 class Command(Enum):
@@ -12,6 +13,7 @@ class Command(Enum):
     END = 4
 
 
+SUBSCRIBER_IP = "localhost"
 key_to_command = {"r": Command.START, "s": Command.STOP, "e": Command.END}
 
 
@@ -19,9 +21,10 @@ key_to_command = {"r": Command.START, "s": Command.STOP, "e": Command.END}
 publisher_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 # Bind the socket to the port
-subscriber_address = ("localhost", 12345)
+subscriber_address = (SUBSCRIBER_IP, 12345)
 
 old_command: Command = None
+
 
 def receive_large_data(sock, buffer_size=4096):
     data = bytearray()
@@ -65,6 +68,7 @@ def on_press(key):
             # Close the socket
             publisher_socket.close()
             return False
+
 
 def on_release(key):
     if key == keyboard.Key.esc:
