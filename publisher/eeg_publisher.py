@@ -9,9 +9,10 @@ class Command(Enum):
     STOP = 1
     START_EVENT = 2
     STOP_EVENT = 3
+    END = 4
 
 
-key_to_command = {"r": Command.START, "s": Command.STOP, "space": Command.EVENT}
+key_to_command = {"r": Command.START, "s": Command.STOP}
 
 
 # Create a UDP socket
@@ -20,12 +21,15 @@ publisher_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 # Bind the socket to the port
 subscriber_address = ("localhost", 12345)
 
+old_command: Command = None
+
 
 def on_press(key):
+    global old_command
     command: Command = None
     try:
         if key == keyboard.Key.space:
-            if command == Command.START:
+            if old_command == Command.START_EVENT:
                 command = Command.STOP_EVENT
             else:
                 command = Command.START_EVENT
@@ -35,9 +39,10 @@ def on_press(key):
         pass
 
     if command:
-        print(f"Pressed {key}")
+        print(f"Sending command {command}")
         # send the key to the subscriber
         publisher_socket.sendto(pkl.dumps(command), subscriber_address)
+        old_command = command
 
 
 def on_release(key):

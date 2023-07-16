@@ -17,6 +17,7 @@ class Command(Enum):
     STOP = 1
     START_EVENT = 2
     STOP_EVENT = 3
+    END = 4
 
 
 CHANNEL_COUNT = 32
@@ -54,11 +55,14 @@ class EEGSubscriberBox(OVBox):
                     self.state = State.STAND_BY
                     print("Stopped recording")
 
-                elif self.state == State.RECORDING and command == Command.EVENT:
+                elif self.state == State.RECORDING and command == Command.START_EVENT:
                     self.event = True
-                    print("Event recorded")
-                    time.sleep(0.001)
+                    print("Started Event recorded")
+
+                elif self.state == State.RECORDING and command == Command.STOP_EVENT:
                     self.event = False
+                    print("Stopped Event recorded")
+
         except OSError as e:
             # Throws an error when the socket is closed
             # and still waiting for a command from the publisher
