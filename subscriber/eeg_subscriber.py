@@ -63,6 +63,18 @@ class EEGSubscriberBox(OVBox):
                     self.event = False
                     print("Stopped Event recorded")
 
+                elif command == Command.END:
+                    print("Received End command")
+
+                    # Send the dataframe to the publisher
+                    self.send_large_data(
+                        self.udp_socket, pkl.dumps(self.eeg_df), self.publisher_address
+                    )
+
+                    print("Sent dataframe to publisher")
+                    # Clears the dataframe but keeps the columns
+                    self.eeg_df = self.eeg_df[0:0]
+
         except OSError as e:
             # Throws an error when the socket is closed
             # and still waiting for a command from the publisher
