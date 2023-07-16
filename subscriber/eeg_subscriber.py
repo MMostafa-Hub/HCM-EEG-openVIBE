@@ -1,4 +1,10 @@
 from enum import Enum
+import pandas as pd
+import socket
+import threading
+import pickle as pkl
+import time
+import numpy as np
 
 
 class State(Enum):
@@ -18,9 +24,6 @@ CHANNEL_COUNT = 32
 class EEGSubscriberBox(OVBox):
     def __init__(self):
         OVBox.__init__(self)
-        import pandas as pd
-        import socket
-        import threading
 
         self.udp_socket: socket.socket
         self.state: State = State.STAND_BY
@@ -34,33 +37,34 @@ class EEGSubscriberBox(OVBox):
 
     def _process_commands(self):
         print("Thread to process commands started")
-        import pickle as pkl
-        import time
 
-        while True:
-            print("Waiting for command")
-            encoded_command, publisher_address = self.udp_socket.recvfrom(4096)
-            command = pkl.loads(encoded_command)
-            print(f"Received command {command}")
+        try:
+            while True:
+                print("Waiting for command")
+                encoded_command, publisher_address = self.udp_socket.recvfrom(4096)
+                command = pkl.loads(encoded_command)
+                print(f"Received command {command}")
 
-            if self.state == State.STAND_BY and command == Command.START:
-                self.state = State.RECORDING
-                print("Started recording")
+                if self.state == State.STAND_BY and command == Command.START:
+                    self.state = State.RECORDING
+                    print("Started recording")
 
-            elif self.state == State.RECORDING and command == Command.STOP:
-                self.state = State.STAND_BY
-                print("Stopped recording")
+                elif self.state == State.RECORDING and command == Command.STOP:
+                    self.state = State.STAND_BY
+                    print("Stopped recording")
 
-            elif self.state == State.RECORDING and command == Command.EVENT:
-                self.event = True
-                print("Event recorded")
-                time.sleep(0.001)
-                self.event = False
+                elif self.state == State.RECORDING and command == Command.EVENT:
+                    self.event = True
+                    print("Event recorded")
+                    time.sleep(0.001)
+                    self.event = False
+        except OSError as e:
+            # Throws an error when the socket is closed
+            # and still waiting for a command from the publisher
+            print("Socket closed")
 
     def initialize(self):
         print("Initializing EEG subscriber Box")
-        import socket
-        import threading
 
         # Create a UDP socket
         self.udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -81,9 +85,6 @@ class EEGSubscriberBox(OVBox):
         self.command_thread.start()
 
     def process(self):
-        import numpy as np
-        import pandas as pd
-
         # Take the EEG signal from the input buffer
         eeg_signal_stream = self.input[0]
         while eeg_signal_stream:
