@@ -25,7 +25,10 @@ def on_press(key):
     command: Command = None
     try:
         if key == keyboard.Key.space:
-            command = Command.EVENT
+            if command == Command.START:
+                command = Command.STOP_EVENT
+            else:
+                command = Command.START_EVENT
         else:
             command = key_to_command.get(key.char)
     except AttributeError:
