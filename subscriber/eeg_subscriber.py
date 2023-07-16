@@ -38,6 +38,12 @@ class EEGSubscriberBox(OVBox):
             + [f"channel_{i}" for i in range(CHANNEL_COUNT)]
         )
 
+    # To send large data over UDP we need to split it into chunks
+    def send_large_data(self, sock: socket.socket, data: bytes, addr: tuple):
+        CHUNK_SIZE = 4096  # Choose a size
+        chunks = [data[i : i + CHUNK_SIZE] for i in range(0, len(data), CHUNK_SIZE)]
+        for chunk in chunks:
+            sock.sendto(chunk, addr)
     def _process_commands(self):
         print("Thread to process commands started")
 
