@@ -40,10 +40,22 @@ def on_press(key):
 
     if command:
         print(f"Sending command {command}")
-        # send the key to the subscriber
+
+        # send the command to the subscriber
         publisher_socket.sendto(pkl.dumps(command), subscriber_address)
         old_command = command
 
+        if command == Command.END:
+            # Receive the dataframe from the subscriber
+            encoded_df = receive_large_data(publisher_socket)
+            eeg_df = pkl.loads(encoded_df)
+
+            # Save the dataframe to a csv file
+            eeg_df.to_csv("eeg_data.csv", index=False)
+
+            # Close the socket
+            publisher_socket.close()
+            return False
 
 def on_release(key):
     if key == keyboard.Key.esc:
