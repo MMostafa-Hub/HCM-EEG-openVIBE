@@ -14,6 +14,7 @@ class Command(Enum):
 
 
 SUBSCRIBER_IP = "localhost"
+EEG_RECEIVED_COUNT = 0
 key_to_command = {"r": Command.START, "s": Command.STOP, "e": Command.END}
 
 
@@ -37,7 +38,7 @@ def receive_large_data(sock, buffer_size=4096):
 
 
 def on_press(key):
-    global old_command
+    global old_command, EEG_RECEIVED_COUNT
     command: Command = None
     try:
         if key == keyboard.Key.space:
@@ -51,7 +52,7 @@ def on_press(key):
         pass
 
     if command:
-        print(f"Sending command {command}")
+        print(f"Sending {command}")
 
         # send the command to the subscriber
         publisher_socket.sendto(pkl.dumps(command), subscriber_address)
@@ -61,17 +62,86 @@ def on_press(key):
             # Receive the dataframe from the subscriber
             encoded_df = receive_large_data(publisher_socket)
             eeg_df = pkl.loads(encoded_df)
+            print("Received dataframe from subscriber")
 
             # Save the dataframe to a csv file
-            eeg_df.to_csv("eeg_data.csv", index=False)
+            eeg_df.to_csv(f"eeg_data_{EEG_RECEIVED_COUNT}.csv", index=False)
+            EEG_RECEIVED_COUNT += 1
+            print(f"Saved dataframe_{EEG_RECEIVED_COUNT} to csv file")
 
-            # Close the socket
-            publisher_socket.close()
-            return False
+
+import pandas as pd
+import plotly.subplots as sp
+import plotly.graph_objects as go
+
+
+def plot_df(df, title):
+    # Ensure 'timestamp' column is in the correct datetime format
+    df["timestamp"] = pd.to_datetime(df["timestamp"])
+
+    fig = sp.make_subplots(
+        rows=32,
+        cols=1,
+        subplot_titles=[f"channel_{i}" for i in range(32)],
+        shared_xaxes=True,
+        vertical_spacing=0.01,
+    )
+
+    for i in range(32):  # assuming 'channel_0' to 'channel_31' are the channel columns
+        # Prepare color array for the given channel
+        colors = df["event"].map({True: "red", False: "blue"})
+
+        fig.add_trace(
+            go.Scatter(
+                x=df["timestamp"],
+                y=df[f"channel_{i}"],
+                name=f"Channel {i}",
+                showlegend=False,
+                mode="lines",
+                line=dict(color="DarkSlateGrey"),
+            ),
+            row=i + 1,  # subplot row index
+            col=1,  # subplot column index
+        )
+
+        # Add the event markers to the plot
+        event_points = df[df["event"] == True]
+        fig.add_trace(
+            go.Scatter(
+                x=event_points["timestamp"],
+                y=event_points[f"channel_{i}"],
+                name=f"Channel {i}",
+                showlegend=False,
+                mode="lines",
+                line=dict(color="#d62728"),
+            ),
+            row=i + 1,  # subplot row index
+            col=1,  # subplot column index
+        )
+
+    fig.update_layout(
+        height=2300,
+        autosize=True,
+        width=None,
+        title_text=title,
+        showlegend=False,
+        yaxis=dict(fixedrange=True),
+    )
+
+    fig.show()
 
 
 def on_release(key):
     if key == keyboard.Key.esc:
+        # Close the socket
+        publisher_socket.close()
+
+        # Visualize the dataframes
+        for i in range(EEG_RECEIVED_COUNT):
+            eeg_df = pd.read_csv(f"eeg_data_{i}.csv")
+            # Plot timeseries of the eeg data for each channel
+            plot_df(eeg_df, f"EEG Data {i}")
+
         # Stop listener
         return False
 

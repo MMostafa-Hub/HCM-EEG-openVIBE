@@ -6,7 +6,6 @@ import pickle as pkl
 import numpy as np
 
 
-
 class State(Enum):
     STAND_BY = 0
     RECORDING = 1
