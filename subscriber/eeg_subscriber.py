@@ -15,10 +15,14 @@ class Command(Enum):
     START = 0
     STOP = 1
     START_EVENT = 2
-    STOP_EVENT = 3
-    END = 4
+    END = 3
 
 
+# FOR eego sports headset
+# CHANNEL_COUNT = 66
+# SUBSCRIBER_IP = "192.168.248.36"
+
+# FOR Generic Oscillator
 CHANNEL_COUNT = 32
 SUBSCRIBER_IP = "localhost"
 
@@ -30,7 +34,7 @@ class EEGSubscriberBox(OVBox):
         self.udp_socket: socket.socket
         self.publisher_address: tuple = None
         self.state: State = State.STAND_BY
-        self.event = False
+        self.event = 0
         self.command_thread: threading.Thread
         self.eeg_signal_header: OVSignalHeader
         self.eeg_df = pd.DataFrame(
@@ -64,12 +68,8 @@ class EEGSubscriberBox(OVBox):
                     print("Stopped recording")
 
                 elif self.state == State.RECORDING and command == Command.START_EVENT:
-                    self.event = True
-                    print("Started Event recorded")
-
-                elif self.state == State.RECORDING and command == Command.STOP_EVENT:
-                    self.event = False
-                    print("Stopped Event recorded")
+                    self.event = self.event + 1
+                    print(f"Started Event {self.event}")
 
                 elif command == Command.END:
                     print("Received End command")
@@ -82,6 +82,9 @@ class EEGSubscriberBox(OVBox):
                     print("Sent dataframe to publisher")
                     # Clears the dataframe but keeps the columns
                     self.eeg_df = self.eeg_df[0:0]
+
+                    # Reset the event count
+                    self.event = 0
 
         except OSError as e:
             # Throws an error when the socket is closed
