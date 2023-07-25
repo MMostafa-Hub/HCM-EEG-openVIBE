@@ -19,12 +19,12 @@ class Command(Enum):
 
 
 # FOR eego sports headset
-# CHANNEL_COUNT = 66
-# SUBSCRIBER_IP = "192.168.248.36"
+CHANNEL_COUNT = 66
+SUBSCRIBER_IP = "192.168.72.36"
 
 # FOR Generic Oscillator
-CHANNEL_COUNT = 32
-SUBSCRIBER_IP = "localhost"
+# CHANNEL_COUNT = 32
+# SUBSCRIBER_IP = "localhost"
 
 
 class EEGSubscriberBox(OVBox):
@@ -41,6 +41,7 @@ class EEGSubscriberBox(OVBox):
             columns=["event", "timestamp"]
             + [f"channel_{i}" for i in range(CHANNEL_COUNT)]
         )
+        self.start: pd.Timestamp
 
     # To send large data over UDP we need to split it into chunks
     def send_large_data(self, sock: socket.socket, data: bytes, addr: tuple):
@@ -61,6 +62,7 @@ class EEGSubscriberBox(OVBox):
 
                 if self.state == State.STAND_BY and command == Command.START:
                     self.state = State.RECORDING
+                    self.start = pd.Timestamp.now()
                     print("Started recording")
 
                 elif self.state == State.RECORDING and command == Command.STOP:
@@ -73,6 +75,8 @@ class EEGSubscriberBox(OVBox):
 
                 elif command == Command.END:
                     print("Received End command")
+                    self.state = State.STAND_BY
+                    print("Stopped recording")
 
                     # Send the dataframe to the publisher
                     self.send_large_data(
@@ -126,13 +130,15 @@ class EEGSubscriberBox(OVBox):
                         tuple(self.eeg_signal_header.dimensionSizes)
                     )
 
-                    for i in range(self.eeg_signal_header.dimensionSizes[0]):
+                    for i in range(self.eeg_signal_header.dimensionSizes[1]):
                         self.eeg_df = self.eeg_df.append(
                             {
-                                "timestamp": pd.Timestamp.now(),
+                                "timestamp": (
+                                    pd.Timestamp.now() - self.start
+                                ).total_seconds(),
                                 "event": self.event,
                                 **{
-                                    f"channel_{j}": eeg_matrix[i, j]
+                                    f"channel_{j}": eeg_matrix[j, i]
                                     for j in range(CHANNEL_COUNT)
                                 },
                             },
