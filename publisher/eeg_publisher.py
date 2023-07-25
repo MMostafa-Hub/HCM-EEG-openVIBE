@@ -14,8 +14,8 @@ class Command(Enum):
     END = 3
 
 
-CHANNEL_COUNT = 32
-SUBSCRIBER_IP = "localhost"
+CHANNEL_COUNT = 66
+SUBSCRIBER_IP = "192.168.72.36"
 EEG_RECEIVED_COUNT = 0
 key_to_command = {"r": Command.START, "s": Command.STOP, "e": Command.END}
 
@@ -27,7 +27,7 @@ publisher_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 subscriber_address = (SUBSCRIBER_IP, 12345)
 
 EVENT_COUNT = 0
-
+RECORDING = False
 
 def receive_large_data(sock, buffer_size=4096):
     data = bytearray()
@@ -40,13 +40,20 @@ def receive_large_data(sock, buffer_size=4096):
 
 
 def on_press(key):
-    global EEG_RECEIVED_COUNT, EVENT_COUNT
+    global EEG_RECEIVED_COUNT, EVENT_COUNT, RECORDING
     command: Optional[Command] = None
     try:
-        if key == keyboard.Key.space:
+        if key == keyboard.Key.page_up:
             command = Command.START_EVENT
             print(f"Started Event {EVENT_COUNT}")
             EVENT_COUNT += 1
+        elif key == keyboard.Key.page_down:
+            if RECORDING:
+               command = Command.END
+               RECORDING = False
+            else:
+                command = Command.START
+                RECORDING = True
         else:
             command = key_to_command.get(key.char)
     except AttributeError:
@@ -114,7 +121,7 @@ def plot_df(df, title):
             )
 
     fig.update_layout(
-        height=2300,
+        height=6000,
         autosize=True,
         width=None,
         title_text=title,
