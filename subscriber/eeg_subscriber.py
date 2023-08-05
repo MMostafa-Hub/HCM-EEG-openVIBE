@@ -82,6 +82,8 @@ class EEGSubscriberBox(OVBox):
                     self.send_large_data(
                         self.udp_socket, pkl.dumps(self.eeg_df), self.publisher_address
                     )
+                    print("Saving the dataframe")
+                    self.eeg_df.to_csv(f"./{pd.Timestamp.now()}.csv")
 
                     print("Sent dataframe to publisher")
                     # Clears the dataframe but keeps the columns
@@ -90,7 +92,7 @@ class EEGSubscriberBox(OVBox):
                     # Reset the event count
                     self.event = 0
 
-        except OSError as e:
+        except OSError:
             # Throws an error when the socket is closed
             # and still waiting for a command from the publisher
             print("Socket closed")
